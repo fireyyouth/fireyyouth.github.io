@@ -1,1 +1,21 @@
-hello fireyyouth
+<h3>tcp 相关</h3>
+<p>
+    <h4>Nagel 算法</h4>
+    主要功能: 让发送方避免发送大量小包(tcp + ip header 就有 40 字节，浪费网络资源)，属于拥塞控制
+    实现思路: 用户态调用 send 时只缓存不发送，等收到 ACK 后把多次缓存的数据放在一个大包里发送
+    效果场景: 从 idle 状态开始，以 RTT 为周期发送 小包，大包，大包，大包 ... 
+    参考文档: https://www.rfc-editor.org/rfc/rfc896.txt (通俗易懂还详细)
+    相关选项: TCP_NODELAY，debian 11 测试发现默认为 0，即启用 Nagel 算法
+    <h4>delayed ack</h4>
+    主要功能: 让接受方少返回一些空 ACK，属于拥塞控制
+    实现思路: 接受方收到数据时不马上返回空 ACK，而是假设短时间内还有数据来，一直等到 XX ms 内没有新数据才返回 ACK
+    相关选项: TCP_QUICKACK，debian 11 测试发现默认为 0，即启用 delayed ack，据说这个选项比较奇怪，只能临时生效，要不停的调用
+    <h4>nagel 和 delayed ack 的矛盾</h4>
+    当发送方启用 Nagel 且接收方启用 delayed ack 时，会不断发生 XX ms 内的短暂死锁，导致性能不佳。郁闷的是 Linux 上二者就是默认同时启用的
+    John Nagel 他老人家在 HackerNews上亲自吐槽了这个问题 (https://news.ycombinator.com/item?id=34179999 # 叫 Animats 的)
+    Golang 对此有个简单的解决办法，标准库创建 socket 后直接设置 TCP_NODELAY，就不存在冲突了。debian 11 上用 go-1.15 测试了 tcp 客户端确实是这样
+    <h4>knetstat</h4>
+    想要实时观察 socket 当前的选项值，用 knetstat 模块非常容易就能做到，可惜似乎不是所有选项都能看到
+    <h4>cork</h4>
+    主要功能: 和 Nagel 有点像，但更激进，必须缓存到 XX 大小才发一个包
+</p>
