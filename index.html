@@ -18,4 +18,44 @@
     想要实时观察 socket 当前的选项值，用 knetstat 模块非常容易就能做到，可惜似乎不是所有选项都能看到
     <h4>cork</h4>
     主要功能: 和 Nagel 有点像，但更激进，必须缓存到 XX 大小才发一个包
+
+
+    <h4>RTO</h4>
+    Retransmission TimeOut
+    每当一个新的 RTT 被算出来时，执行以下更新
+    RTTVAR := (1 - beta) * RTTVAR + beta * |SRTT - R'|
+    SRTT := (1 - alpha) * SRTT + alpha * R'
+    RTO := SRTT + max (G, K*RTTVAR)
+    以上参考 https://datatracker.ietf.org/doc/html/rfc6298
+    根据 http://sgros.blogspot.com/2012/02/calculating-tcp-rto.html，linux 的算法不是 rfc 那么简单
+    在 debian 11 的 ss 测试中，rto = 204, rtt=0.058/0.029，上一个链接提到 Linux 源码中 TCP_RTO_MIN = 200ms，但不知道怎么算出 204 的
+
+
+    <h4>丢包</h4>
+    发送方有两种判断丢包的方式，RTO timeout 或收到重复 ack，通过后者能更早地判断出丢包。
+    重复 ack 的直接原因是接受方收到了一个乱序到达的包，可能是丢包也可能就是正常的乱序，如果重复 ack 出现 3 次，是丢包的可能性就很大，此时发送方就执行重传
+    参考文档: https://datatracker.ietf.org/doc/html/rfc2001 # 快速重传 
+    <h4>慢启动</h4>
+    cwnd 一开始很小，在传输数据过程中指数级增大, 根据 https://datatracker.ietf.org/doc/html/rfc5681 初始值是 2/3/4，但在 debian 11 用 ss -i 测试发现 cwnd 一开始就是 10 (10 的单位解释参考 https://blog.mygraphql.com/en/notes/low-tec/network/tcp-inspect/)
+    这个不一致网上有人问过 https://stackoverflow.com/questions/64531503/why-linuxnewer-version-congestion-control-doesnt-follow-rfc5681, 答案是 google 提出的这个 10 的初始值，看来不能完全相信 rfc
+    <h4>拥塞避免</h4>
+    限制 cwnd 线性增长，每个 RTT 增长不超过 MSS
+    <h4>快速重传</h4>
+    参考 "丢包"
+    <h4>快速恢复</h4>
+    当快速重传被执行后，cwnd 减半，执行拥塞避免算法(即限制线性增长)
+    参考 https://datatracker.ietf.org/doc/html/rfc2001
+
+    <h4>reno</h4>
+    debian 11 支持的一种拥塞控制算法
+    名字来自 https://gunkies.org/wiki/4.3_BSD_Reno
+    根据 https://datatracker.ietf.org/doc/html/rfc9438 里提到的 "classical Reno congestion control [RFC5681]", reno 应该就是遵循经典算法的实现
+    <h4>cubic</h4>
+    debian 11 默认的拥塞控制算法
+    相对于传统拥塞避免算法使用线性增长，此算法使用立方函数更加激进，属于 reno 和 BIC (另一种算法) 的折中
+    <h4>bbr</h4>
+    Bottleneck Bandwidth and RTT
+    传统拥塞控制算法在遇到丢包时就认为拥塞出现了，要么将 cwnd 减半然后缓慢增长，要么直接重置慢启动。在路由器为 shallow buffer 的场景中，丢包并不意味着拥塞，把 cwd 大幅缩小不可取，所以 bbr 不用丢包作为拥塞的根据，而是基于模型来调整 cwnd
+
+
 </p>
