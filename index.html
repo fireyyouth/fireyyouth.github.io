@@ -93,7 +93,7 @@
 
 <script type="module">
     import * as vue from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-    import { createRouter, createWebHistory  } from 'https://unpkg.com/vue-router@4.0.15/dist/vue-router.esm-browser.js'
+    import { createRouter, createWebHashHistory  } from 'https://unpkg.com/vue-router@4.0.15/dist/vue-router.esm-browser.js'
 
     let MenuNode = {
         template: '#menu_node_template',
@@ -189,7 +189,7 @@
     }
 
     const router = createRouter({
-        history: createWebHistory(),
+        history: createWebHashHistory(),
         routes,
     })
     
