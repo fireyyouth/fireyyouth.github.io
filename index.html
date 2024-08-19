@@ -69,6 +69,16 @@
     </div>
 </template>
 
+<style>
+    .frame-panel {
+        height: 100%;
+        width: 100%;
+    }
+</style>
+<template id="iframe_panel_template">
+    <iframe class="frame-panel" :src="src"></iframe>
+</template>
+
 <div id="app" class="dashboard">
     <nav class="menu">
         <ul>
@@ -125,24 +135,23 @@
         data() {
             let items = [
                 {
-                    name: '菜单一',
+                    name: '工具箱',
                     kids: [
                         {
-                            name: '功能1',
-                            kids: [
-                                {
-                                    name: '特性a',
-                                    path: '/0'
-                                },
-                                {
-                                    name: '特性b',
-                                    path: '/1'
-                                }
-                            ]
+                            name: '笔记',
+                            path: '/notes'
                         },
                         {
-                            name: '功能2',
-                            path: '/2'
+                            name: '抽奖',
+                            path: '/lottery'
+                        },
+                        {
+                            name: '二维码',
+                            path: '/qrcode'
+                        },
+                        {
+                            name: '评分',
+                            path: '/feedback'
                         }
                     ]
                 },
@@ -150,12 +159,12 @@
                     name: '菜单二',
                     kids: [
                         {
-                            name: '功能3',
-                            path: '/3'
+                            name: '功能1',
+                            path: '/1'
                         },
                         {
-                            name: '功能4',
-                            path: '/4'
+                            name: '功能2',
+                            path: '/2'
                         }
                     ]
                 }
@@ -170,28 +179,59 @@
         }
     })
 
+    function iframe_component(src) {
+        return {
+            template: '#iframe_panel_template',
+            data() {
+                return {
+                    src: src
+                }
+            }
+        }
+    }
+
     let routes = [
         {
             path: '/',
             component: {
                 template: 'init panel'
             }
+        },
+        {
+            path: '/notes',
+            component: iframe_component('./notes.html')
+        },
+        {
+            path: '/lottery',
+            component: iframe_component('./lottery.html')
+
+        },
+        {
+            path: '/qrcode',
+            component: iframe_component('./qrcode.html')
+        },
+        {
+            path: '/feedback',
+            component: iframe_component('./feedback.html')
+        },
+        {
+            path: `/1`,
+            component: {
+                template: `panel 1`
+            }
+        },
+        {
+            path: `/2`,
+            component: {
+                template: `panel 2`
+            }
         }
     ]
-
-    for (let i = 0; i < 5; ++i) {
-        routes.push({
-            path: `/${i}`,
-            component: {
-                template: `panel ${i}`
-            }
-        })
-    }
 
     const router = createRouter({
         history: createWebHashHistory(),
         routes,
     })
-    
     app.use(router).mount('#app')
 </script>
+

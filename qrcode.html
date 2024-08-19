@@ -1,0 +1,49 @@
+<style>
+    .preview {
+        max-width: 20rem;
+        max-height: 20rem;
+    }
+    .decode-result {
+        background-color: lightgray;
+        min-height: 1rem;
+    }
+</style>
+
+<div id="app">
+    <div>
+        <input type="file" @change="decode">
+    </div>
+    <img :src="blob_url" class="preview">
+    <div class="decode-result">
+        {{ decode_result }}
+    </div>
+</div>
+
+<script src="https://unpkg.com/qrcode-decoder@0.3.1/dist/index.min.js"></script>
+<script type="module">
+    import * as vue from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+    let app = vue.createApp({
+        data() {
+            return {
+                decode_result: '',
+                blob_url: '',
+            }
+        },
+        methods: {
+            decode(event) {
+                let file = event.target.files[0]
+                this.blob_url = URL.createObjectURL(file)
+                let self = this;
+                let qr = new QrcodeDecoder();
+                qr.decodeFromImage(this.blob_url).then((res) => {
+                    if (res) {
+                        self.decode_result = res.data
+                    } else {
+                        self.decode_result = 'decode fail'
+                    }
+                });
+            }
+        }
+    })
+    app.mount('#app')
+</script>
