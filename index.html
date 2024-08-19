@@ -79,6 +79,25 @@
     <iframe class="frame-panel" :src="src"></iframe>
 </template>
 
+<style>
+    .home-panel {
+        height: 100%;
+        width: 100%;
+        background-image: url(https://up.zhuoku.org/pic_source/c8/d8/ab/c8d8abe232ff5ca894a3f6f64f360390.jpg);
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: xx-large;
+        color: whitesmoke;
+    }
+</style>
+<template id="home_panel_template">
+    <div class="home-panel">
+        欢迎来到主页
+    </div>
+</template>
+
 <div id="app" class="dashboard">
     <nav class="menu">
         <ul>
@@ -134,6 +153,10 @@
     let app = vue.createApp({
         data() {
             let items = [
+                {
+                    name: '主页',
+                    path: '/'
+                },
                 {
                     name: '工具箱',
                     kids: [
@@ -194,7 +217,7 @@
         {
             path: '/',
             component: {
-                template: 'init panel'
+                template: '#home_panel_template'
             }
         },
         {
